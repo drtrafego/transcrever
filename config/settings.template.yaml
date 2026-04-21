@@ -1,0 +1,140 @@
+# Video Transcription Agent - Configuração Principal
+# ===================================================
+
+# Configurações do Google Drive
+drive:
+  folder_id: "YOUR_DRIVE_FOLDER_ID_HERE"  # ID da pasta do Google Drive para monitorar
+  check_interval: 300  # Intervalo de verificação em segundos (5 minutos)
+  credentials_file: "config/drive_credentials.json"
+  token_file: "config/token.json"
+  max_file_size_mb: 2048  # Tamanho máximo de arquivo (2GB)
+  supported_formats: ["mp4", "avi", "mov", "mkv", "wmv", "flv", "webm"]
+
+# Configurações do Whisper
+whisper:
+  model: "base"  # tiny, base, small, medium, large
+  device: "cpu"  # cpu, cuda
+  language: "pt"  # auto para detecção automática, ou código específico
+  
+  # Configurações avançadas
+  fp16: false  # Half precision (apenas GPU)
+  temperature: 0.0
+  compression_ratio_threshold: 2.4
+  logprob_threshold: -1.0
+  no_speech_threshold: 0.6
+  
+  # Processamento em chunks
+  chunk_length: 30  # segundos
+  overlap: 5  # segundos de sobreposição
+
+# Configurações de processamento
+processing:
+  max_workers: 2  # Número de workers simultâneos
+  max_concurrent_downloads: 1  # Downloads simultâneos
+  chunk_size_mb: 100  # Tamanho do chunk para download
+  
+  # Timeouts
+  download_timeout: 1800  # 30 minutos
+  transcription_timeout: 3600  # 1 hora
+  
+  # Política de retry
+  max_retries: 3
+  retry_delay: 60  # segundos
+  exponential_backoff: true
+
+# Configurações de cache
+cache:
+  max_size_gb: 10  # Tamanho máximo do cache em GB
+  cleanup_interval: 3600  # Intervalo de limpeza em segundos (1 hora)
+  ttl_hours: 24  # Time to live em horas
+  auto_cleanup: true
+
+# Configurações de banco de dados
+database:
+  type: "sqlite"  # sqlite, postgresql
+  url: "sqlite:///data/database.sqlite"
+  # Para PostgreSQL: "postgresql://user:password@localhost/dbname"
+  
+  # Pool de conexões (PostgreSQL)
+  pool_size: 5
+  max_overflow: 10
+
+# Configurações do Redis
+redis:
+  url: "redis://localhost:6379/0"
+  max_connections: 10
+  socket_timeout: 30
+
+# Configurações de logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "data/logs/app.log"
+  max_size_mb: 100
+  backup_count: 5
+  console_output: true
+
+# Configurações de saída
+output:
+  formats: ["txt", "srt", "json"]  # Formatos de saída desejados
+  base_path: "data/outputs"
+  
+  # Configurações específicas por formato
+  txt:
+    clean_text: true
+    include_timestamps: false
+  
+  srt:
+    max_line_length: 80
+    max_lines_per_subtitle: 2
+  
+  json:
+    include_metadata: true
+    include_confidence: true
+
+# Configurações de monitoramento
+monitoring:
+  enabled: true
+  metrics_port: 9090
+  dashboard_port: 8080
+  health_check_interval: 60
+
+# Configurações de notificações
+notifications:
+  enabled: false
+  
+  # Email (opcional)
+  email:
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    username: "your-email@gmail.com"
+    password: "your-app-password"
+    from_email: "your-email@gmail.com"
+    to_emails: ["admin@company.com"]
+  
+  # Webhook (opcional)
+  webhook:
+    url: "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+    events: ["error", "completion"]
+
+# Configurações de segurança
+security:
+  encrypt_cache: false
+  audit_logging: true
+  max_api_calls_per_minute: 60
+  
+# Configurações específicas por ambiente
+environment: "development"  # development, production
+
+# Configurações de desenvolvimento
+development:
+  debug: true
+  auto_reload: true
+  test_mode: false
+
+# Configurações de produção
+production:
+  debug: false
+  auto_reload: false
+  workers: 4
+  max_requests: 1000

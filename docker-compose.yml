@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # Aplicação principal
+  transcription-app:
+    build: 
+      context: .
+      target: production
+    container_name: transcription-app
+    restart: unless-stopped
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=sqlite:///app/data/transcription.db
+      - REDIS_URL=redis://redis:6379/0
+      - GOOGLE_CREDENTIALS_PATH=/app/config/google_credentials.json
+    volumes:
+      - ./config:/app/config:ro
+      - ./data:/app/data
+    depends_on:
+      - redis
+    networks:
+      - transcription-network
+
+  # Celery Workers
+  celery-worker:
+    build: 
+      context: .
+      target: production
+    container_name: celery-worker
+    restart: unless-stopped
+    command: celery -A src.workers.celery_app worker --loglevel=info --concurrency=2
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=sqlite:///app/data/transcription.db
+      - REDIS_URL=redis://redis:6379/0
+      - GOOGLE_CREDENTIALS_PATH=/app/config/google_credentials.json
+    volumes:
+      - ./config:/app/config:ro
+      - ./data:/app/data
+    depends_on:
+      - redis
+    networks:
+      - transcription-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 3G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+  # Redis (Cache e Message Broker)
+  redis:
+    image: redis:7-alpine
+    container_name: transcription-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - transcription-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+# Volumes
+volumes:
+  redis_data:
+    driver: local
+
+# Networks
+networks:
+  transcription-network:
+    driver: bridge
+
+# Configurações adicionais para desenvolvimento
+x-development: &development-settings
+  environment:
+    - ENVIRONMENT=development
+    - DEBUG=true
+    - LOG_LEVEL=DEBUG
+  volumes:
+    - .:/app
+    - /app/venv  # Excluir venv do bind mount
+
+# Override para desenvolvimento
+# Use: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+services:
+  transcription-app-dev:
+    <<: *development-settings
+    extends:
+      service: transcription-app
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+    profiles:
+      - development

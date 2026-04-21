@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+.env
+.venv/
+venv/
+
+# Node
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+
+# Data / outputs - nao versionar arquivos de video e transcricao
+data/
+transcricao/
+transcrição/
+videos/
+
+# ffmpeg binaries
+ffmpeg.exe
+ffplay.exe
+ffprobe.exe
+
+# Logs
+*.log
+
+# ffmpeg folder (tem .git proprio)
+ffmpeg/
