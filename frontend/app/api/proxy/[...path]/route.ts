@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
-const BACKEND = process.env.API_URL || 'http://localhost:8765'
+const BACKEND = process.env.API_URL || 'http://31.97.21.249:8765'
 
 async function handler(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params
