@@ -6,7 +6,6 @@ import { Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { formatBytes } from '@/lib/utils'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 const ALLOWED = ['.mp4', '.m4a', '.ogg', '.wav', '.mp3', '.webm']
 
 export function VideoUpload() {
@@ -46,7 +45,7 @@ export function VideoUpload() {
     formData.append('file', file)
 
     try {
-      const res = await fetch(`${API_URL}/videos/upload`, {
+      const res = await fetch(`/api/proxy/videos/upload`, {
         method: 'POST',
         body: formData,
       })
