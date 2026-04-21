@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { formatBytes } from '@/lib/utils'
 
 const ALLOWED = ['.mp4', '.m4a', '.ogg', '.wav', '.mp3', '.webm']
+const UPLOAD_URL = 'https://api.transcrever.casaldotrafego.com/videos/upload'
 
 export function VideoUpload() {
   const [dragging, setDragging] = useState(false)
@@ -45,7 +46,7 @@ export function VideoUpload() {
     formData.append('file', file)
 
     try {
-      const res = await fetch(`/api/proxy/videos/upload`, {
+      const res = await fetch(UPLOAD_URL, {
         method: 'POST',
         body: formData,
       })
